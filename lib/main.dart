@@ -239,48 +239,58 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
           ],
         ),
       ),
-      body: Column(
+      body: Stack(
+        alignment: Alignment.center,
         children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              ScoreBoard(),
-              Container(
-                color: Colors.red,
-                child: JackPlayer(
-                  isMyTurn: turn == 0,
+          Positioned(
+            left: 5,
+            top: 0,
+            child: ScoreBoard(),
+          ),
+          Positioned(
+            top: 0,
+            right: 5,
+            child: Container(
+              width: 100,
+              padding: EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(
+                  color: Colors.white.withOpacity(0.5),
+                  width: 2,
                 ),
               ),
-              Container(
-                width: 100,
-                padding: EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(
-                    color: Colors.white.withOpacity(0.5),
-                    width: 2,
-                  ),
-                ),
-              ),
-            ],
+            ),
           ),
-
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              JackPlayer(
-                isMyTurn: turn == 1,
+          Positioned(
+            top: 0,
+            // left: width / 2,
+            // left: 0,
+            // right: 0,
+            child: Container(
+              color: Colors.red,
+              child: JackPlayer(
+                isMyTurn: turn == 0,
               ),
-              JackPlayer(
-                isMyTurn: turn == 3,
-              ),
-            ],
+            ),
           ),
-
-          // if (isShown)
-          //   for (int index = 0; index <= images!.length - 1; index++)
-          //     images![index],
+          Positioned(
+            // top: 300,
+            right: 5,
+            child: JackPlayer(
+              isMyTurn: turn == 1,
+            ),
+          ),
+          Positioned(
+            // top: 300,
+            left: 5,
+            child: JackPlayer(
+              isMyTurn: turn == 3,
+            ),
+          ),
+          if (isShown)
+            for (int index = 0; index <= images!.length - 1; index++)
+              images![index],
           // Positioned(
           //   left: 0,
           //   right: 0,
@@ -314,7 +324,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
         child: Column(
           children: [
             Transform.translate(
-              offset: Offset(-0, -0),
+              offset: Offset(-110, -120),
               child: Text("hello"),
             ),
             Row(
@@ -480,10 +490,10 @@ class _JackPlayerState extends State<JackPlayer> with TickerProviderStateMixin {
   @override
   void initState() {
     animatedContainer =
-        AnimationController(vsync: this, duration: Duration(seconds: 3));
+        AnimationController(vsync: this, duration: Duration(seconds: 1));
     animation =
         CurvedAnimation(parent: animatedContainer, curve: Curves.easeInOut);
-    // animatedContainer.repeat(reverse: true, period: Duration(seconds: 3));
+    animatedContainer.repeat(reverse: true);
 
     fadeInAnimationController =
         AnimationController(vsync: this, duration: Duration(seconds: 1));
@@ -521,108 +531,108 @@ class _JackPlayerState extends State<JackPlayer> with TickerProviderStateMixin {
     changeTurn();
     return Column(
       children: [
-        Column(
+        Stack(
           children: [
-            ScaleTransition(
-                scale: animation,
-                child: Container(
-                  padding: EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(10),
+            Column(
+              children: [
+                ScaleTransition(
+                    scale: animation,
+                    child: Container(
+                      padding: EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Text(
+                        "Hello! I am sonu",
+                        maxLines: 1,
+                      ),
+                    )),
+                FadeTransition(
+                  opacity: fadeInAnimation,
+                  child: CupertinoActivityIndicator(
+                    color: Color.fromARGB(255, 170, 255, 0),
+                    radius: 10,
                   ),
-                  child: Text(
-                    "Hello! I am sonu",
-                    style: TextStyle(
-                      fontSize: 12,
-                    ),
-                    maxLines: 1,
-                  ),
-                )),
-            FadeTransition(
-              opacity: fadeInAnimation,
-              child: CupertinoActivityIndicator(
-                color: Color.fromARGB(255, 170, 255, 0),
-                radius: 10,
-              ),
-            ),
-            Image.asset(
-              "assets/image/images.png",
-              height: 130,
-              fit: BoxFit.contain,
+                ),
+                Image.asset(
+                  "assets/image/images.png",
+                  height: 130,
+                  fit: BoxFit.contain,
+                ),
+              ],
             ),
           ],
         ),
+        Container(
+          width: 100,
+          // padding: EdgeInsets.all(3),
+          decoration: BoxDecoration(
+            color: Color(0xff1082CB),
+            borderRadius: BorderRadius.circular(5),
+            border: Border.all(
+              color: Colors.white.withOpacity(0.7),
+              width: 2,
+            ),
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(bottom: 8, top: 3),
+                child: Text(
+                  "Sonu",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              Divider(
+                height: 0,
+                color: Colors.white,
+                thickness: 2,
 
-        // Container(
-        //   width: 100,
-        //   // padding: EdgeInsets.all(3),
-        //   decoration: BoxDecoration(
-        //     color: Color(0xff1082CB),
-        //     borderRadius: BorderRadius.circular(5),
-        //     border: Border.all(
-        //       color: Colors.white.withOpacity(0.7),
-        //       width: 2,
-        //     ),
-        //   ),
-        //   child: Column(
-        //     mainAxisAlignment: MainAxisAlignment.start,
-        //     children: [
-        //       Padding(
-        //         padding: const EdgeInsets.only(bottom: 8, top: 3),
-        //         child: Text(
-        //           "Sonu",
-        //           style: TextStyle(
-        //             color: Colors.white,
-        //             fontWeight: FontWeight.bold,
-        //           ),
-        //         ),
-        //       ),
-        //       Divider(
-        //         height: 0,
-        //         color: Colors.white,
-        //         thickness: 2,
-
-        //         // height: 1,
-        //       ),
-        //       IntrinsicHeight(
-        //         child: Row(
-        //           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        //           children: [
-        //             Padding(
-        //               padding: const EdgeInsets.symmetric(vertical: 4.0),
-        //               child: Text(
-        //                 "Pts. 0",
-        //                 style: TextStyle(
-        //                   color: Colors.white,
-        //                   fontSize: 12,
-        //                 ),
-        //               ),
-        //             ),
-        //             VerticalDivider(
-        //               thickness: 1,
-        //               color: Colors.white,
-        //               // height: 100,
-        //             ),
-        //             Padding(
-        //               padding: const EdgeInsets.symmetric(vertical: 4.0),
-        //               child: Center(
-        //                 child: Text(
-        //                   "0/4",
-        //                   style: TextStyle(
-        //                     color: Colors.amber,
-        //                     fontSize: 18,
-        //                   ),
-        //                   textAlign: TextAlign.center,
-        //                 ),
-        //               ),
-        //             )
-        //           ],
-        //         ),
-        //       ),
-        //     ],
-        //   ),
-        // ),
+                // height: 1,
+              ),
+              IntrinsicHeight(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 4.0),
+                      child: Text(
+                        "Pts. 0",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
+                    VerticalDivider(
+                      thickness: 1,
+                      color: Colors.white,
+                      // height: 100,
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 4.0),
+                      child: Center(
+                        child: Text(
+                          "0/4",
+                          style: TextStyle(
+                            color: Colors.amber,
+                            fontSize: 18,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    )
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
       ],
     );
   }
