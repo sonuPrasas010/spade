@@ -5,6 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:spade/animatedtext.dart';
 import 'package:spade/files/enums.dart';
 import 'package:spade/templates/card.dart';
 
@@ -62,14 +63,38 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   int turn = 1;
   late double height;
   late double width;
+  late AnimationController animationController;
+  late Animation<double> animation;
 
   @override
   void initState() {
+    this.animationController =
+        AnimationController(vsync: this, duration: Duration(seconds: 3));
+
+    this.animation = Tween<double>(
+      begin: 0.0,
+      end: -200,
+    ).animate(
+      CurvedAnimation(
+          parent: this.animationController, curve: Curves.easeInCubic),
+    );
+    this.animationController.forward();
+    this.animationController.repeat(reverse: true);
+    this.animationController.addListener(() {
+      setState(() {});
+      for (var element in setStates) {
+        element(() {});
+      }
+    });
     super.initState();
   }
 
+  // animationController.repeat(reverse: true);
+
   List<StatefulBuilder>? images;
   List<Function> setStates = [];
+  // List<AnimationController> animationControllers = [];
+  // List<Animation> animations = [];
 
   @override
   void didChangeDependencies() {
@@ -87,98 +112,78 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
 
   void distributeCard() async {
     for (var i = 0; i < images!.length; i++) {
-      setStates[i](() {
-        // isTapped = true;
-      });
+      setStates[i](() {});
       await Future.delayed(Duration(milliseconds: 1000));
     }
   }
 
   void generateCard() {
-    if (images == null)
-      images = List.generate(
-        12,
-        (index) {
-          print(index);
-          return StatefulBuilder(builder: (context, fun) {
-            setStates.add(fun);
+    images = List.generate(
+      12,
+      (index) {
+        print(index);
+        return StatefulBuilder(builder: (context, fun) {
+          // setStates.add(fun);
+          // AnimationController animationController;
+          // Animation<double> animation;
 
-            if (index == 0 || index == 4 || index == 8)
-              return AnimatedPositioned(
-                onEnd: () {
-                  // turn++;
-                  print("ended animating");
-                },
-                top: isTapped ? height / 3 : height / 2,
+          // animationController =
+          //     AnimationController(vsync: this, duration: Duration(seconds: 3));
 
-                right: width / 2,
+          // animation = Tween<double>(
+          //   begin: 0.0,
+          //   end: -200,
+          // ).animate(
+          //   CurvedAnimation(
+          //       parent: animationController, curve: Curves.easeInCubic),
+          // );
+          // animationController.forward();
+          // animationController.repeat(reverse: true);
+          // animationController.addListener(() {
+          //   setState(() {});
+          //   fun(() {});
+          // });
 
-                // left: 0,
-                child: SvgPicture.asset(
-                  "assets/image/card_back.svg",
-                  height: 40,
-                  width: 20,
-                ),
-                curve: Curves.linear,
-                duration: Duration(milliseconds: 1000),
-              );
-            else if (index == 1 || index == 5 || index == 9) {
-              return AnimatedPositioned(
-                onEnd: () {
-                  // turn++;
-                  print("ended animating");
-                },
-                top: isTapped ? height / 2 + 20 : height / 2,
-                right: isTapped ? 30 : width / 2,
-                child: SvgPicture.asset(
-                  "assets/image/card_back.svg",
-                  height: 40,
-                  width: 20,
-                ),
-                curve: Curves.linear,
-                duration: Duration(milliseconds: 1000),
-              );
-            } else if (index == 2 || index == 6 || index == 10) {
-              return AnimatedPositioned(
-                onEnd: () {
-                  // turn++;
-                  print("ended animating");
-                },
-                top: isTapped ? height - 250 : height / 2,
-                // top: 0,
-
-                right: width / 2,
-                child: SvgPicture.asset(
-                  "assets/image/card_back.svg",
-                  height: 40,
-                  width: 20,
-                ),
-                curve: Curves.linear,
-                duration: Duration(milliseconds: 1000),
-              );
-            }
-
-            return AnimatedPositioned(
-              onEnd: () {
-                // turn++;
-                print("ended animating");
-              },
-              top: isTapped ? height / 2 + 20 : height / 2,
-              // left:!isTapped?null: 20,
-
-              right: isTapped ? width * 80 / 100 : width / 2,
-
+          if (index == 0 || index == 4 || index == 8)
+            return Transform.translate(
+              offset: Offset(0, this.animation.value),
               child: SvgPicture.asset(
                 "assets/image/card_back.svg",
                 height: 40,
                 width: 20,
               ),
-              curve: Curves.linear,
-              duration: Duration(milliseconds: 1000),
             );
-          });
-        },
-      );
+          else if (index == 1 || index == 5 || index == 9) {
+            return Transform.translate(
+              offset: Offset(0, 0),
+              child: SvgPicture.asset(
+                "assets/image/card_back.svg",
+                height: 40,
+                width: 20,
+              ),
+            );
+          } else if (index == 2 || index == 6 || index == 10) {
+            return Transform.translate(
+              offset: Offset(0, 0),
+              child: SvgPicture.asset(
+                "assets/image/card_back.svg",
+                height: 40,
+                width: 20,
+              ),
+            );
+          }
+
+          return Transform.translate(
+            offset: Offset(0, 0),
+            child: SvgPicture.asset(
+              "assets/image/card_back.svg",
+              height: 40,
+              width: 20,
+            ),
+          );
+        });
+      },
+    );
   }
 
   @override
@@ -199,98 +204,125 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
         backgroundColor: Colors.black45,
         elevation: 0,
         toolbarHeight: 80,
-        title: Row(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Column(
-              children: [
-                Text(
-                  "Mode",
-                  style: TextStyle(color: Colors.white, fontSize: 12),
-                ),
-                Text(
-                  "3 card",
-                  style: TextStyle(
-                    fontSize: 25,
-                    color: Colors.white,
-                  ),
-                )
-              ],
-            ),
-            Column(
-              children: [
-                Text(
-                  "Mode",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 12,
-                  ),
-                ),
-                Text(
-                  "3 card",
-                  style: TextStyle(
-                    fontSize: 25,
-                    color: Colors.white,
-                  ),
-                )
-              ],
-            )
-          ],
-        ),
+        title: AppBarContent(),
       ),
-      body: Stack(
-        alignment: Alignment.center,
+      body: Column(
         children: [
-          Positioned(
-            left: 5,
-            top: 0,
-            child: ScoreBoard(),
-          ),
-          Positioned(
-            top: 0,
-            right: 5,
-            child: Container(
-              width: 100,
-              padding: EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(
-                  color: Colors.white.withOpacity(0.5),
-                  width: 2,
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              ScoreBoard(),
+              Container(
+                color: Colors.red,
+                child: Column(
+                  children: [
+                    JackPlayer(
+                      isMyTurn: turn == 0,
+                    ),
+                    Stack(
+                      children: [
+                        for (var index = 0; index < images!.length; index++)
+                          if (index == 0 || index == 4 || index == 8)
+                            images![index]
+                      ],
+                    ),
+                  ],
                 ),
               ),
-            ),
-          ),
-          Positioned(
-            top: 0,
-            // left: width / 2,
-            // left: 0,
-            // right: 0,
-            child: Container(
-              color: Colors.red,
-              child: JackPlayer(
-                isMyTurn: turn == 0,
+              Container(
+                width: 100,
+                padding: EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(
+                    color: Colors.white.withOpacity(0.5),
+                    width: 2,
+                  ),
+                ),
               ),
-            ),
+            ],
           ),
-          Positioned(
-            // top: 300,
-            right: 5,
-            child: JackPlayer(
-              isMyTurn: turn == 1,
-            ),
+
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                children: [
+                  JackPlayer(
+                    isMyTurn: turn == 1,
+                  ),
+                  Stack(
+                    children: [
+                      Transform.translate(
+                        offset: Offset(width / 2 - 50, -20),
+                        child: SvgPicture.asset(
+                          "assets/image/card_back.svg",
+                          height: 40,
+                          width: 20,
+                        ),
+                      ),
+                      Transform.translate(
+                        offset: Offset(0, -0),
+                        child: SvgPicture.asset(
+                          "assets/image/card_back.svg",
+                          height: 40,
+                          width: 20,
+                        ),
+                      ),
+                      Transform.translate(
+                        offset: Offset(0, 0),
+                        child: SvgPicture.asset(
+                          "assets/image/card_back.svg",
+                          height: 40,
+                          width: 20,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              Column(
+                children: [
+                  JackPlayer(
+                    isMyTurn: turn == 3,
+                  ),
+                  Stack(
+                    children: [
+                      Transform.translate(
+                        offset: Offset(width / 2 - 50, -20),
+                        child: SvgPicture.asset(
+                          "assets/image/card_back.svg",
+                          height: 40,
+                          width: 20,
+                        ),
+                      ),
+                      Transform.translate(
+                        offset: Offset(0, -0),
+                        child: SvgPicture.asset(
+                          "assets/image/card_back.svg",
+                          height: 40,
+                          width: 20,
+                        ),
+                      ),
+                      Transform.translate(
+                        offset: Offset(0, -0),
+                        child: SvgPicture.asset(
+                          "assets/image/card_back.svg",
+                          height: 40,
+                          width: 20,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
           ),
-          Positioned(
-            // top: 300,
-            left: 5,
-            child: JackPlayer(
-              isMyTurn: turn == 3,
-            ),
-          ),
-          if (isShown)
-            for (int index = 0; index <= images!.length - 1; index++)
-              images![index],
+
+          // if (isShown)
+          //   for (int index = 0; index <= images!.length - 1; index++)
+          //     images![index],
           // Positioned(
           //   left: 0,
           //   right: 0,
@@ -323,10 +355,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
         ),
         child: Column(
           children: [
-            Transform.translate(
-              offset: Offset(-110, -120),
-              child: Text("hello"),
-            ),
+            AnimatedText(this.animationController),
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.center,
@@ -410,6 +439,55 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   }
 }
 
+class AppBarContent extends StatelessWidget {
+  const AppBarContent({
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Column(
+          children: [
+            Text(
+              "Mode",
+              style: TextStyle(color: Colors.white, fontSize: 12),
+            ),
+            Text(
+              "3 card",
+              style: TextStyle(
+                fontSize: 25,
+                color: Colors.white,
+              ),
+            )
+          ],
+        ),
+        Column(
+          children: [
+            Text(
+              "Mode",
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 12,
+              ),
+            ),
+            Text(
+              "3 card",
+              style: TextStyle(
+                fontSize: 25,
+                color: Colors.white,
+              ),
+            )
+          ],
+        )
+      ],
+    );
+  }
+}
+
 class ScoreBoard extends StatelessWidget {
   const ScoreBoard({
     Key? key,
@@ -476,6 +554,7 @@ class ScoreBoard extends StatelessWidget {
 
 class JackPlayer extends StatefulWidget {
   final bool isMyTurn;
+
   JackPlayer({required this.isMyTurn});
   @override
   State<JackPlayer> createState() => _JackPlayerState();
@@ -490,10 +569,10 @@ class _JackPlayerState extends State<JackPlayer> with TickerProviderStateMixin {
   @override
   void initState() {
     animatedContainer =
-        AnimationController(vsync: this, duration: Duration(seconds: 1));
+        AnimationController(vsync: this, duration: Duration(seconds: 3));
     animation =
         CurvedAnimation(parent: animatedContainer, curve: Curves.easeInOut);
-    animatedContainer.repeat(reverse: true);
+    // animatedContainer.repeat(reverse: true, period: Duration(seconds: 3));
 
     fadeInAnimationController =
         AnimationController(vsync: this, duration: Duration(seconds: 1));
@@ -531,108 +610,108 @@ class _JackPlayerState extends State<JackPlayer> with TickerProviderStateMixin {
     changeTurn();
     return Column(
       children: [
-        Stack(
+        Column(
           children: [
-            Column(
-              children: [
-                ScaleTransition(
-                    scale: animation,
-                    child: Container(
-                      padding: EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Text(
-                        "Hello! I am sonu",
-                        maxLines: 1,
-                      ),
-                    )),
-                FadeTransition(
-                  opacity: fadeInAnimation,
-                  child: CupertinoActivityIndicator(
-                    color: Color.fromARGB(255, 170, 255, 0),
-                    radius: 10,
+            ScaleTransition(
+                scale: animation,
+                child: Container(
+                  padding: EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(10),
                   ),
-                ),
-                Image.asset(
-                  "assets/image/images.png",
-                  height: 130,
-                  fit: BoxFit.contain,
-                ),
-              ],
+                  child: Text(
+                    "Hello! I am sonu",
+                    style: TextStyle(
+                      fontSize: 12,
+                    ),
+                    maxLines: 1,
+                  ),
+                )),
+            FadeTransition(
+              opacity: fadeInAnimation,
+              child: CupertinoActivityIndicator(
+                color: Color.fromARGB(255, 170, 255, 0),
+                radius: 10,
+              ),
+            ),
+            Image.asset(
+              "assets/image/images.png",
+              height: 130,
+              fit: BoxFit.contain,
             ),
           ],
         ),
-        Container(
-          width: 100,
-          // padding: EdgeInsets.all(3),
-          decoration: BoxDecoration(
-            color: Color(0xff1082CB),
-            borderRadius: BorderRadius.circular(5),
-            border: Border.all(
-              color: Colors.white.withOpacity(0.7),
-              width: 2,
-            ),
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(bottom: 8, top: 3),
-                child: Text(
-                  "Sonu",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-              Divider(
-                height: 0,
-                color: Colors.white,
-                thickness: 2,
 
-                // height: 1,
-              ),
-              IntrinsicHeight(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 4.0),
-                      child: Text(
-                        "Pts. 0",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ),
-                    VerticalDivider(
-                      thickness: 1,
-                      color: Colors.white,
-                      // height: 100,
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 4.0),
-                      child: Center(
-                        child: Text(
-                          "0/4",
-                          style: TextStyle(
-                            color: Colors.amber,
-                            fontSize: 18,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                    )
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
+        // Container(
+        //   width: 100,
+        //   // padding: EdgeInsets.all(3),
+        //   decoration: BoxDecoration(
+        //     color: Color(0xff1082CB),
+        //     borderRadius: BorderRadius.circular(5),
+        //     border: Border.all(
+        //       color: Colors.white.withOpacity(0.7),
+        //       width: 2,
+        //     ),
+        //   ),
+        //   child: Column(
+        //     mainAxisAlignment: MainAxisAlignment.start,
+        //     children: [
+        //       Padding(
+        //         padding: const EdgeInsets.only(bottom: 8, top: 3),
+        //         child: Text(
+        //           "Sonu",
+        //           style: TextStyle(
+        //             color: Colors.white,
+        //             fontWeight: FontWeight.bold,
+        //           ),
+        //         ),
+        //       ),
+        //       Divider(
+        //         height: 0,
+        //         color: Colors.white,
+        //         thickness: 2,
+
+        //         // height: 1,
+        //       ),
+        //       IntrinsicHeight(
+        //         child: Row(
+        //           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        //           children: [
+        //             Padding(
+        //               padding: const EdgeInsets.symmetric(vertical: 4.0),
+        //               child: Text(
+        //                 "Pts. 0",
+        //                 style: TextStyle(
+        //                   color: Colors.white,
+        //                   fontSize: 12,
+        //                 ),
+        //               ),
+        //             ),
+        //             VerticalDivider(
+        //               thickness: 1,
+        //               color: Colors.white,
+        //               // height: 100,
+        //             ),
+        //             Padding(
+        //               padding: const EdgeInsets.symmetric(vertical: 4.0),
+        //               child: Center(
+        //                 child: Text(
+        //                   "0/4",
+        //                   style: TextStyle(
+        //                     color: Colors.amber,
+        //                     fontSize: 18,
+        //                   ),
+        //                   textAlign: TextAlign.center,
+        //                 ),
+        //               ),
+        //             )
+        //           ],
+        //         ),
+        //       ),
+        //     ],
+        //   ),
+        // ),
       ],
     );
   }
