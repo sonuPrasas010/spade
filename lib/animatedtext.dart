@@ -1,8 +1,9 @@
 import 'package:flutter/cupertino.dart';
 
 class AnimatedText extends StatefulWidget {
+  final Animation<Offset> animation;
   final AnimationController animationController;
-  const AnimatedText(this.animationController, {super.key});
+  const AnimatedText(this.animation, this.animationController, {super.key});
 
   @override
   State<AnimatedText> createState() => _AnimatedTextState();
@@ -10,23 +11,11 @@ class AnimatedText extends StatefulWidget {
 
 class _AnimatedTextState extends State<AnimatedText>
     with SingleTickerProviderStateMixin {
-  late AnimationController animationController;
-  late Animation<double> animation;
   @override
   void initState() {
-    this.animationController =
-        AnimationController(vsync: this, duration: Duration(seconds: 3));
-
-    this.animation = Tween<double>(
-      begin: 0.0,
-      end: -200,
-    ).animate(
-      CurvedAnimation(
-          parent: this.animationController, curve: Curves.easeInCubic),
-    );
-    this.animationController.forward();
-    this.animationController.repeat(reverse: true);
-    this.animationController.addListener(() {
+    widget.animationController.forward();
+    // widget.animationController.repeat(reverse: true);
+    widget.animationController.addListener(() {
       setState(() {});
       print("hello");
     });
@@ -36,7 +25,9 @@ class _AnimatedTextState extends State<AnimatedText>
 
   @override
   Widget build(BuildContext context) {
-    return Transform.translate(
-        offset: Offset(0, animationController.value), child: Text("Hello"));
+    return SlideTransition(
+      position: widget.animation,
+      child: Text("Hello"),
+    );
   }
 }

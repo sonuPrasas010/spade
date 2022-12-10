@@ -1,13 +1,20 @@
 import 'dart:developer';
 import 'dart:math' as math;
 
+import 'package:flip_card/flip_card_controller.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:get/get.dart';
 import 'package:spade/animatedtext.dart';
 import 'package:spade/files/enums.dart';
+import 'package:spade/playable_card.dart';
 import 'package:spade/templates/card.dart';
+
+import 'templates/GetFlipCard.dart';
+import 'controllers/animations/card_controllers.dart';
+import 'templates/jack_player.dart';
 
 void main() {
   runApp(const MyApp());
@@ -19,7 +26,7 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return GetMaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
         // This is the theme of your application.
@@ -59,34 +66,26 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   bool isTapped = false;
   bool isShown = true;
-  bool hasAlreadyDistributed = false;
+  bool distributed = false;
   int turn = 1;
   late double height;
   late double width;
-  late AnimationController animationController;
-  late Animation<double> animation;
+  Duration animationDuration = const Duration(milliseconds: 300);
+  List<AnimationController> animationControllers = [];
+
+  FlipCardController flipCardController = FlipCardController();
+  CardController _cardController = Get.put(CardController());
+
+  List<Animation<Offset>> animations = [];
+  // DraggableScrollableController c = Draga
 
   @override
   void initState() {
-    this.animationController =
-        AnimationController(vsync: this, duration: Duration(seconds: 3));
-
-    this.animation = Tween<double>(
-      begin: 0.0,
-      end: -200,
-    ).animate(
-      CurvedAnimation(
-          parent: this.animationController, curve: Curves.easeInCubic),
-    );
-    this.animationController.forward();
-    this.animationController.repeat(reverse: true);
-    this.animationController.addListener(() {
-      setState(() {});
-      for (var element in setStates) {
-        element(() {});
-      }
-    });
     super.initState();
+  }
+
+  flipCard() {
+    flipCardController.toggleCard();
   }
 
   // animationController.repeat(reverse: true);
@@ -110,77 +109,74 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     super.didChangeDependencies();
   }
 
-  void distributeCard() async {
-    for (var i = 0; i < images!.length; i++) {
-      setStates[i](() {});
-      await Future.delayed(Duration(milliseconds: 1000));
-    }
-  }
-
   void generateCard() {
     images = List.generate(
       12,
       (index) {
         print(index);
         return StatefulBuilder(builder: (context, fun) {
-          // setStates.add(fun);
-          // AnimationController animationController;
-          // Animation<double> animation;
+          if (index == 0 || index == 4 || index == 8) {
+            var animationController =
+                AnimationController(vsync: this, duration: animationDuration);
 
-          // animationController =
-          //     AnimationController(vsync: this, duration: Duration(seconds: 3));
-
-          // animation = Tween<double>(
-          //   begin: 0.0,
-          //   end: -200,
-          // ).animate(
-          //   CurvedAnimation(
-          //       parent: animationController, curve: Curves.easeInCubic),
-          // );
-          // animationController.forward();
-          // animationController.repeat(reverse: true);
-          // animationController.addListener(() {
-          //   setState(() {});
-          //   fun(() {});
-          // });
-
-          if (index == 0 || index == 4 || index == 8)
-            return Transform.translate(
-              offset: Offset(0, this.animation.value),
-              child: SvgPicture.asset(
-                "assets/image/card_back.svg",
-                height: 40,
-                width: 20,
-              ),
+            var animation = Tween<Offset>(
+              begin: Offset(0, 0),
+              end: Offset(0, -2),
+            ).animate(
+              CurvedAnimation(
+                  parent: animationController, curve: Curves.easeInCubic),
             );
-          else if (index == 1 || index == 5 || index == 9) {
-            return Transform.translate(
-              offset: Offset(0, 0),
-              child: SvgPicture.asset(
-                "assets/image/card_back.svg",
-                height: 40,
-                width: 20,
-              ),
+
+            animationControllers.add(animationController);
+            animations.add(animation);
+            return PlayableCard(animation, animationController);
+          } else if (index == 1 || index == 5 || index == 9) {
+            var animationController =
+                AnimationController(vsync: this, duration: animationDuration);
+
+            var animation = Tween<Offset>(
+              begin: Offset(0, 0),
+              end: Offset(3.2, 1),
+            ).animate(
+              CurvedAnimation(
+                  parent: animationController, curve: Curves.easeInCubic),
             );
+
+            animationControllers.add(animationController);
+            animations.add(animation);
+            return PlayableCard(animation, animationController);
           } else if (index == 2 || index == 6 || index == 10) {
-            return Transform.translate(
-              offset: Offset(0, 0),
-              child: SvgPicture.asset(
-                "assets/image/card_back.svg",
-                height: 40,
-                width: 20,
-              ),
+            var animationController =
+                AnimationController(vsync: this, duration: animationDuration);
+
+            var animation = Tween<Offset>(
+              begin: Offset(0, 0),
+              end: Offset(0, 2),
+            ).animate(
+              CurvedAnimation(
+                  parent: animationController, curve: Curves.easeInCubic),
             );
+
+            animationControllers.add(animationController);
+            animations.add(animation);
+            return PlayableCard(animation, animationController);
           }
 
-          return Transform.translate(
-            offset: Offset(0, 0),
-            child: SvgPicture.asset(
-              "assets/image/card_back.svg",
-              height: 40,
-              width: 20,
-            ),
+          var animationController =
+              AnimationController(vsync: this, duration: animationDuration);
+
+          var animation = Tween<Offset>(
+            begin: Offset(0, 0),
+            end: Offset(-3.2, 1),
+          ).animate(
+            CurvedAnimation(
+                parent: animationController, curve: Curves.easeInCubic),
           );
+
+          animationControllers.add(animationController);
+          animations.add(animation);
+
+          return PlayableCard(animation, animationController);
         });
       },
     );
@@ -190,14 +186,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     SystemChrome.setEnabledSystemUIMode(
       SystemUiMode.immersiveSticky,
-    ); // to hide only bottom bar
-
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
+    );
     return Scaffold(
       backgroundColor: Colors.blue,
       appBar: AppBar(
@@ -207,28 +196,16 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
         title: AppBarContent(),
       ),
       body: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               ScoreBoard(),
-              Container(
-                color: Colors.red,
-                child: Column(
-                  children: [
-                    JackPlayer(
-                      isMyTurn: turn == 0,
-                    ),
-                    Stack(
-                      children: [
-                        for (var index = 0; index < images!.length; index++)
-                          if (index == 0 || index == 4 || index == 8)
-                            images![index]
-                      ],
-                    ),
-                  ],
-                ),
+              JackPlayer(
+                isMyTurn: turn == 0,
               ),
               Container(
                 width: 100,
@@ -244,8 +221,11 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
             ],
           ),
 
+          Spacer(),
+
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Column(
                 children: [
@@ -254,71 +234,32 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                   ),
                   Stack(
                     children: [
-                      Transform.translate(
-                        offset: Offset(width / 2 - 50, -20),
-                        child: SvgPicture.asset(
-                          "assets/image/card_back.svg",
-                          height: 40,
-                          width: 20,
-                        ),
-                      ),
-                      Transform.translate(
-                        offset: Offset(0, -0),
-                        child: SvgPicture.asset(
-                          "assets/image/card_back.svg",
-                          height: 40,
-                          width: 20,
-                        ),
-                      ),
-                      Transform.translate(
-                        offset: Offset(0, 0),
-                        child: SvgPicture.asset(
-                          "assets/image/card_back.svg",
-                          height: 40,
-                          width: 20,
-                        ),
-                      ),
+                      // for (var index = 0; index < images!.length; index++)
+                      //   if (index == 1 || index == 5 || index == 9)
+                      //     images![index]
                     ],
                   ),
                 ],
               ),
-              Column(
-                children: [
-                  JackPlayer(
-                    isMyTurn: turn == 3,
-                  ),
-                  Stack(
-                    children: [
-                      Transform.translate(
-                        offset: Offset(width / 2 - 50, -20),
-                        child: SvgPicture.asset(
-                          "assets/image/card_back.svg",
-                          height: 40,
-                          width: 20,
-                        ),
-                      ),
-                      Transform.translate(
-                        offset: Offset(0, -0),
-                        child: SvgPicture.asset(
-                          "assets/image/card_back.svg",
-                          height: 40,
-                          width: 20,
-                        ),
-                      ),
-                      Transform.translate(
-                        offset: Offset(0, -0),
-                        child: SvgPicture.asset(
-                          "assets/image/card_back.svg",
-                          height: 40,
-                          width: 20,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
+              Center(
+                child: Stack(children: [
+                  for (int i = 0; i < images!.length; i++) images![i]
+                ]),
+              ),
+              JackPlayer(
+                isMyTurn: turn == 3,
               ),
             ],
           ),
+          Spacer(),
+          Stack(
+            children: [
+              // for (var index = 0; index < images!.length; index++)
+              //   if (index == 2 || index == 6 || index == 10) images![index]
+            ],
+          ),
+
+          Spacer(),
 
           // if (isShown)
           //   for (int index = 0; index <= images!.length - 1; index++)
@@ -355,7 +296,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
         ),
         child: Column(
           children: [
-            AnimatedText(this.animationController),
+            // AnimatedText(animations[0], animationControllers[0]),
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.center,
@@ -380,10 +321,9 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                 children: [
                   ElevatedButton(
                     onPressed: () {
-                      isTapped = true;
-                      distributeCard();
+                      _cardController.flipCard();
                     },
-                    child: Text("Distribute Card"),
+                    child: Text("Flip Cards"),
                   ),
                   ElevatedButton(
                     onPressed: () {
@@ -413,7 +353,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                     ),
                   ),
                   ElevatedButton(
-                    onPressed: () {
+                    onPressed: () async {
                       // images!.clear();
                       // setStates.clear();
                       // print(images!.length);
@@ -421,9 +361,18 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                       // generateCard();
 
                       // print("regenerate card");
-                      isTapped = false;
-                      distributeCard();
-                      print("pll and distribute");
+
+                      for (var i = 0; i < images!.length; i++) {
+                        if (animationControllers[i].isDismissed) {
+                          await animationControllers[i].forward();
+                          distributed = true;
+                        } else {
+                          distributed = false;
+                          await animationControllers[i].reverse();
+                        }
+                        setState(() {});
+                        await Future.delayed(Duration(milliseconds: 100));
+                      }
                     },
                     child: Text(
                       "Pull and Distribute",
@@ -548,171 +497,6 @@ class ScoreBoard extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-}
-
-class JackPlayer extends StatefulWidget {
-  final bool isMyTurn;
-
-  JackPlayer({required this.isMyTurn});
-  @override
-  State<JackPlayer> createState() => _JackPlayerState();
-}
-
-class _JackPlayerState extends State<JackPlayer> with TickerProviderStateMixin {
-  late AnimationController animatedContainer;
-  late Animation<double> animation;
-  late AnimationController fadeInAnimationController;
-  late Animation<double> fadeInAnimation;
-
-  @override
-  void initState() {
-    animatedContainer =
-        AnimationController(vsync: this, duration: Duration(seconds: 3));
-    animation =
-        CurvedAnimation(parent: animatedContainer, curve: Curves.easeInOut);
-    // animatedContainer.repeat(reverse: true, period: Duration(seconds: 3));
-
-    fadeInAnimationController =
-        AnimationController(vsync: this, duration: Duration(seconds: 1));
-    fadeInAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1,
-    ).animate(CurvedAnimation(
-        parent: fadeInAnimationController, curve: Curves.easeInSine));
-
-    // fadeInAnimationController.repeat(reverse: true);
-    super.initState();
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-  }
-
-  @override
-  void didUpdateWidget(covariant JackPlayer oldWidget) {
-    changeTurn();
-    super.didUpdateWidget(oldWidget);
-  }
-
-  void changeTurn() {
-    if (widget.isMyTurn) {
-      fadeInAnimationController.forward();
-    } else {
-      fadeInAnimationController.animateBack(0);
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    changeTurn();
-    return Column(
-      children: [
-        Column(
-          children: [
-            ScaleTransition(
-                scale: animation,
-                child: Container(
-                  padding: EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Text(
-                    "Hello! I am sonu",
-                    style: TextStyle(
-                      fontSize: 12,
-                    ),
-                    maxLines: 1,
-                  ),
-                )),
-            FadeTransition(
-              opacity: fadeInAnimation,
-              child: CupertinoActivityIndicator(
-                color: Color.fromARGB(255, 170, 255, 0),
-                radius: 10,
-              ),
-            ),
-            Image.asset(
-              "assets/image/images.png",
-              height: 130,
-              fit: BoxFit.contain,
-            ),
-          ],
-        ),
-
-        // Container(
-        //   width: 100,
-        //   // padding: EdgeInsets.all(3),
-        //   decoration: BoxDecoration(
-        //     color: Color(0xff1082CB),
-        //     borderRadius: BorderRadius.circular(5),
-        //     border: Border.all(
-        //       color: Colors.white.withOpacity(0.7),
-        //       width: 2,
-        //     ),
-        //   ),
-        //   child: Column(
-        //     mainAxisAlignment: MainAxisAlignment.start,
-        //     children: [
-        //       Padding(
-        //         padding: const EdgeInsets.only(bottom: 8, top: 3),
-        //         child: Text(
-        //           "Sonu",
-        //           style: TextStyle(
-        //             color: Colors.white,
-        //             fontWeight: FontWeight.bold,
-        //           ),
-        //         ),
-        //       ),
-        //       Divider(
-        //         height: 0,
-        //         color: Colors.white,
-        //         thickness: 2,
-
-        //         // height: 1,
-        //       ),
-        //       IntrinsicHeight(
-        //         child: Row(
-        //           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        //           children: [
-        //             Padding(
-        //               padding: const EdgeInsets.symmetric(vertical: 4.0),
-        //               child: Text(
-        //                 "Pts. 0",
-        //                 style: TextStyle(
-        //                   color: Colors.white,
-        //                   fontSize: 12,
-        //                 ),
-        //               ),
-        //             ),
-        //             VerticalDivider(
-        //               thickness: 1,
-        //               color: Colors.white,
-        //               // height: 100,
-        //             ),
-        //             Padding(
-        //               padding: const EdgeInsets.symmetric(vertical: 4.0),
-        //               child: Center(
-        //                 child: Text(
-        //                   "0/4",
-        //                   style: TextStyle(
-        //                     color: Colors.amber,
-        //                     fontSize: 18,
-        //                   ),
-        //                   textAlign: TextAlign.center,
-        //                 ),
-        //               ),
-        //             )
-        //           ],
-        //         ),
-        //       ),
-        //     ],
-        //   ),
-        // ),
-      ],
     );
   }
 }
